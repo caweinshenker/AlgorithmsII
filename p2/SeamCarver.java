@@ -9,7 +9,7 @@ public class SeamCarver {
 	private Color[][] colors;
 	private int width;
 	private int height;
-	private enum ORIENTATION { HORIZONTAL, VERTICAL};
+	private enum ORIENTATION { HORIZONTAL, VERTICAL };
 	private ORIENTATION orientation;
 
 
@@ -19,48 +19,44 @@ public class SeamCarver {
 
 		width = picture.width();
 		height = picture.height();
-		colors = new Color[height()][width()];
+		colors = new Color[height][width];
 		orientation = ORIENTATION.VERTICAL;
 
 
-		for (int row=0; row < height(); row++) {
-			for (int col=0; col < width(); col++) {
+		for (int row=0; row < height; row++) {
+			for (int col=0; col < width; col++) {
 				colors[row][col] = picture.get(col, row);
 			}
 		}
+
+		fillEnergies();
 	}
 
 	public Picture picture() {
-		if (orientation == ORIENTATION.HORIZONTAL)
+		if (orientation == ORIENTATION.HORIZONTAL) {
 			transpose();
+			orientation = ORIENTATION.VERTICAL;
+		}
 
 		Picture picture = new Picture(width, height);
-		for (int row=0; row < height(); row++) {
-			for (int col=0; col < width(); col++) {
+		for (int row=0; row < height; row++) {
+			for (int col=0; col < width; col++) {
 				picture.set(col, row, colors[row][col]);
 			}
 		}
+
 		return picture;
 	}
 
 	public int width() {
-		return width;
+		return orientation == ORIENTATION.VERTICAL ? width : height;
 	}
 
 
 	public int height()  {
-		return height;
+		return orientation == ORIENTATION.VERTICAL ? height : width;
 	}
 
-	public double energy(int col,  int row)  {
-		if (col < 0 || col >= width() || row < 0 || row >= height())
-			throw new java.lang.IllegalArgumentException("Coordinates out of bounds");
-
-		if (col == 0 || col == width() - 1 || row == 0 || row == height() - 1)
-			return 1000;
-
-		return gradient(col, row);
-	}
 
 	private double gradient(int col, int row) {
 		Color left = colors[row][col - 1];
@@ -79,15 +75,12 @@ public class SeamCarver {
 	}
 
 	public int[] findHorizontalSeam() {
-		if (orientation != ORIENTATION.HORIZONTAL){
-			transpose();
-			orientation = ORIENTATION.HORIZONTAL;
-		}
-		else orientation = ORIENTATION.VERTICAL;
+		if (orientation != ORIENTATION.HORIZONTAL) transpose();
+		orientation = ORIENTATION.VERTICAL;
 
 		int[] seam = findVerticalSeam();
 
-
+		orientation = ORIENTATION.HORIZONTAL;
 		return seam;
 	}
 
@@ -97,13 +90,11 @@ public class SeamCarver {
 
 		if (orientation == ORIENTATION.HORIZONTAL) {
 			transpose();
-			orientation = ORIENTATION.VERTICAL;
 		}
 
 		edgeTo = new Point2D[height][width];
 		distTo = new double[height][width];
 
-		fillEnergies();
 		initDistToAndEdgeTo(edgeTo, distTo);
 		for (int row=0; row < height; row++){
 			for (int col=0; col < width; col++) {
@@ -111,22 +102,23 @@ public class SeamCarver {
 			}
 		}
 
+
 		return trace(edgeTo, distTo);
 	}
 
 	private int[] trace(Point2D edgeTo[][], double[][] distTo) {
 		int curCol = -1;
 		double minDist = Double.MAX_VALUE;
-		int[] seam = new int[height()];
+		int[] seam = new int[height];
 
-		for (int col=0; col < width(); col++) {
-			if (distTo[height() - 1][col] < minDist) {
+		for (int col=0; col < width; col++) {
+			if (distTo[height - 1][col] < minDist) {
 				curCol = col;
-				minDist = distTo[height() - 1][curCol];
+				minDist = distTo[height - 1][curCol];
 			}
 		}
 
-		for (int row= height() - 1; row > 0; row--){
+		for (int row= height - 1; row > 0; row--){
 			seam[row] = curCol;
 			curCol = (int) edgeTo[row][curCol].y();
 		}
@@ -136,23 +128,23 @@ public class SeamCarver {
 	}
 
 	private void initDistToAndEdgeTo(Point2D[][] edgeTo, double[][] distTo) {
-		for (int row=0; row < height(); row++) {
-			for (int col=0; col < width(); col++) {
+		for (int row=0; row < height; row++) {
+			for (int col=0; col < width; col++) {
 				distTo[row][col] = Double.MAX_VALUE;
 				edgeTo[row][col] = null;
 			}
 		}
-		for (int col=0; col < width(); col++)
+		for (int col=0; col < width; col++)
 			distTo[0][col] = 0;
 	}
 
 	private ArrayList<Point2D> reachableVertices(int row, int col) {
 		ArrayList<Point2D> reachable = new ArrayList<Point2D>();
 
-		if (row == height() - 1) return reachable;
+		if (row == height - 1) return reachable;
 
 		if (col > 0) reachable.add(new Point2D (row + 1, col - 1));
-		if (col < width() - 1) reachable.add(new Point2D(row + 1, col + 1));
+		if (col < width - 1) reachable.add(new Point2D(row + 1, col + 1));
 		reachable.add(new Point2D(row + 1, col));
 
 		return reachable;
@@ -174,29 +166,31 @@ public class SeamCarver {
 	}
 
 	public void removeHorizontalSeam(int[] seam) {
-		if (width() <= 1) throw new java.lang.IllegalArgumentException("Cannot remove seam");
+		if (width <= 1) throw new java.lang.IllegalArgumentException("Cannot remove seam");
 		validateSeam(seam, ORIENTATION.HORIZONTAL);
 		Color[][] newColors = new Color[--height][width];
-		for (int row=0; row < height(); row++) {
-			for (int col=0; col < width(); col++) {
+		for (int row=0; row < height; row++) {
+			for (int col=0; col < width; col++) {
 				if (seam[col] != row)
 					newColors[row][col] = colors[row][col];
 			}
 		}
 		colors = newColors;
+		fillEnergies();
 	}
 
 	public void removeVerticalSeam(int[] seam) {
-		if (height() <= 1) throw new java.lang.IllegalArgumentException("Cannot remove seam");
+		if (height <= 1) throw new java.lang.IllegalArgumentException("Cannot remove seam");
 		validateSeam(seam, ORIENTATION.HORIZONTAL);
 		Color[][] newColors = new Color[height][--width];
-		for (int row=0; row < height(); row++) {
-			for (int col=0; col < width(); col++) {
+		for (int row=0; row < height; row++) {
+			for (int col=0; col < width; col++) {
 				if (seam[row] != col)
 					newColors[row][col] = colors[row][col];
 			}
 		}
 		colors = newColors;
+		fillEnergies();
 	}
 
 	private void validateSeam(int[] seam, ORIENTATION orientation){
@@ -211,28 +205,44 @@ public class SeamCarver {
 		}
 	}
 
+	
+	public double energy(int col,  int row)  {
+		if (col < 0 || col >= width() || row < 0 || row >= height()){
+			throw new java.lang.IllegalArgumentException("Coordinates out of bounds");
+		}
+
+		if (col == 0 || col == width() - 1 || row == 0 || row == height() - 1)
+			return 1000;
+
+		return orientation == ORIENTATION.VERTICAL ? gradient(col, row) : gradient(row, col);
+	}
+
 	private void fillEnergies() {
-		energies = new double[height()][width()];
-		for (int row=0; row < height(); row++){
-			for (int col=0; col < width(); col++) {
-				energies[row][col] = energy(col, row);
+		energies = new double[height][width];
+		for (int row=0; row < height; row++){
+			for (int col=0; col < width; col++) {
+				if (orientation == ORIENTATION.VERTICAL)
+					energies[row][col] = energy(col, row);
+				else
+					energies[row][col] = energy(row, col);
 			}
 		}
 	}
 
 	private void transpose() {
-		Color[][] transposed = new Color[width()][height()];
-		for (int row=0; row < height(); row++) {
-			for (int col=0; col < width(); col++){
-				transposed[col][row] = colors[row][col];
+		int tmp = height;
+		height = width;
+		width = tmp;
+
+		Color[][] transposed = new Color[height][width];
+		for (int row=0; row < height; row++) {
+			for (int col=0; col < width; col++){
+				transposed[row][col] = colors[col][row];
 			}
 		}
 
 		colors = transposed;
-
-		int tmp = height;
-		height = width;
-		width = tmp;
+		fillEnergies();
 	}
 
 }
