@@ -33,10 +33,7 @@ public class SeamCarver {
 	}
 
 	public Picture picture() {
-		if (orientation == ORIENTATION.HORIZONTAL) {
-			transpose();
-			orientation = ORIENTATION.VERTICAL;
-		}
+		transposeV();
 
 		Picture picture = new Picture(width, height);
 		for (int row=0; row < height; row++) {
@@ -75,8 +72,7 @@ public class SeamCarver {
 	}
 
 	public int[] findHorizontalSeam() {
-		if (orientation != ORIENTATION.HORIZONTAL) transpose();
-		orientation = ORIENTATION.VERTICAL;
+		transposeH();
 
 		int[] seam = findVerticalSeam();
 
@@ -88,10 +84,7 @@ public class SeamCarver {
 		Point2D edgeTo[][];
 		double distTo[][];
 
-		if (orientation == ORIENTATION.HORIZONTAL) {
-			transpose();
-		}
-		orientation = ORIENTATION.VERTICAL;
+		transposeV();
 
 		edgeTo = new Point2D[height][width];
 		distTo = new double[height][width];
@@ -168,19 +161,15 @@ public class SeamCarver {
 	}
 
 	public void removeHorizontalSeam(int[] seam) {
-		if (orientation == ORIENTATION.VERTICAL){
-			transpose();
-		}
+		transposeH();
 		removeVerticalSeam(seam);
 		orientation = ORIENTATION.HORIZONTAL;
 	}
 
 	public void removeVerticalSeam(int[] seam) {
-		if (orientation == ORIENTATION.HORIZONTAL){
-			transpose();
-			orientation = ORIENTATION.VERTICAL;
-		}
+		transposeV();
 		validateSeam(seam);
+
 		Color[][] newColors = new Color[height][width - 1];
 		for (int row=0; row < height; row++) {
 			for (int col=0; col < width; col++) {
@@ -196,20 +185,22 @@ public class SeamCarver {
 	}
 
 	private void validateSeam(int[] seam){
-		if (height() <= 1 ) throw new java.lang.IllegalArgumentException("Cannot remove seam");
+		if (width <= 1 ) throw new java.lang.IllegalArgumentException("Cannot remove seam");
 
-		if (seam == null || seam.length != height())
-			throw new java.lang.IllegalArgumentException("Invalid seam: wrong length");
+		if (seam == null || seam.length != height) throw new java.lang.IllegalArgumentException("Invalid seam: wrong length");
 
-		for (int i = 0; i < height() - 1; i++){
-			if (seam[i] < 0 || seam[i] >= seam.length || Math.abs(seam[i+1] - seam[i]) > 1){
-				//StdOut.printf("%d, %d, %d\n", i, seam[i+1], seam[i]);
+		for (int i = 0; i < height - 2; i++) { 
+
+			if (seam[i] < 0 || seam[i] >= width) throw new java.lang.IllegalArgumentException("Invalid seam: seam out of bound");
+
+			boolean adjacentVertices = Math.abs(seam[i+1] - seam[i]) <= 1;
+			if (!adjacentVertices) {
 				throw new java.lang.IllegalArgumentException("Invalid seam: unadjacent vertex");
 			}
+
 		}
 	}
 
-	
 	public double energy(int col,  int row)  {
 		if (col < 0 || col >= width() || row < 0 || row >= height()){
 			throw new java.lang.IllegalArgumentException("Coordinates out of bounds");
@@ -231,6 +222,16 @@ public class SeamCarver {
 					energies[row][col] = energy(row, col);
 			}
 		}
+	}
+
+	private void transposeH(){
+		if (orientation == ORIENTATION.VERTICAL) transpose();
+		orientation = ORIENTATION.VERTICAL;
+	}
+
+	private void transposeV() {
+		if (orientation == ORIENTATION.HORIZONTAL) transpose();
+		orientation = ORIENTATION.VERTICAL;
 	}
 
 	private void transpose() {
