@@ -168,13 +168,16 @@ public class SeamCarver {
 	public void removeHorizontalSeam(int[] seam) {
 		if (width <= 1) throw new java.lang.IllegalArgumentException("Cannot remove seam");
 		validateSeam(seam, ORIENTATION.HORIZONTAL);
-		Color[][] newColors = new Color[--height][width];
+		Color[][] newColors = new Color[height - 1][width];
 		for (int row=0; row < height; row++) {
 			for (int col=0; col < width; col++) {
-				if (seam[col] != row)
+				if (row < seam[col])
 					newColors[row][col] = colors[row][col];
+				else if (row > seam[col])
+					newColors[row - 1][col] = colors[row][col];
 			}
 		}
+		height--;
 		colors = newColors;
 		fillEnergies();
 	}
@@ -182,11 +185,13 @@ public class SeamCarver {
 	public void removeVerticalSeam(int[] seam) {
 		if (height <= 1) throw new java.lang.IllegalArgumentException("Cannot remove seam");
 		validateSeam(seam, ORIENTATION.HORIZONTAL);
-		Color[][] newColors = new Color[height][--width];
+		Color[][] newColors = new Color[height][width - 1];
 		for (int row=0; row < height; row++) {
 			for (int col=0; col < width; col++) {
-				if (seam[row] != col)
+				if (col < seam[row])
 					newColors[row][col] = colors[row][col];
+				else if (col > seam[row])
+					newColors[row][col - 1] = colors[row][col];
 			}
 		}
 		colors = newColors;
@@ -200,8 +205,10 @@ public class SeamCarver {
 			throw new java.lang.IllegalArgumentException("Invalid seam: wrong length");
 
 		for (int i = 0; i < expectedSeamLength - 1; i++){
-			if (i < 0 || i >= seam.length || Math.abs(seam[i+1] - seam[i]) <= 1)
+			if (seam[i] < 0 || seam[i] >= seam.length || Math.abs(seam[i+1] - seam[i]) > 1){
+				StdOut.printf("%d, %d, %d\n", i, seam[i+1], seam[i]);
 				throw new java.lang.IllegalArgumentException("Invalid seam: unadjacent vertex");
+			}
 		}
 	}
 
