@@ -9,8 +9,8 @@ public class BaseballElimination {
 	private int[] losses;
 	private int[] remaining;
 	private int[][] against;
+	private String[] names;
 	private FordFulkerson ff;
-	private String lastTeam;
 
 	public BaseballElimination(String filename) {
 
@@ -23,24 +23,20 @@ public class BaseballElimination {
 		losses = new int[teams];
 		against = new int [teams][teams];
 		remaining = new int[teams];
-
-
-		ArrayList<String> teamNames = new ArrayList<String>();
-		ArrayList<ArrayList<Integer>> gamesToPlay = new ArrayList<ArrayList<Integer>>();
-
-		lastTeam = null;
+		names = new String[teams];
+		ff = null;
 
 		for (int team= 0; team < teams ; team++) {
 			String teamName = in.readString();
 			teamNumbers.put(teamName, team);
+			names[team] = teamName;
 			wins[team] = in.readInt();
-			wins[team] = in.readInt();
+			losses[team] = in.readInt();
+			remaining[team] = in.readInt();
 			for (int opponent = 0; opponent < teams; opponent++) {
 				against[team][opponent] = in.readInt();
 			}
 		}
-
-		fillRemaining();
 	}
 
 	public int numberOfTeams() {
@@ -65,15 +61,6 @@ public class BaseballElimination {
 		return wins[teamNumbers.get(team)];
 	}
 
-	private void fillRemaining() {
-		for (int team = 0; team < numberOfTeams(); team++){
-			int remainingGames = 0;
-			for (int opponent = 0; opponent < numberOfTeams(); opponent++)
-				remainingGames += against[team][opponent];
-			remaining[team] = remainingGames;
-		}
-	}
-
 	public int remaining(String team) {
 		if (!teamNumbers.containsKey(team))
 			throw new java.lang.IllegalArgumentException("Invalid team");
@@ -88,6 +75,10 @@ public class BaseballElimination {
 		return against[teamNumbers.get(team1)][teamNumbers.get(team2)];
 	}
 
+	private String teamName(int id) {
+		return names[id];
+	}
+
 	public boolean isEliminated(String team) {
 		if (!teamNumbers.containsKey(team))
 			throw new java.lang.IllegalArgumentException("Invalid team");
@@ -95,46 +86,68 @@ public class BaseballElimination {
 		return isTriviallyEliminated(team) || isNonTriviallyEliminated(team);
 	}
 
-	private boolean isTriviallyEliminated(String team) {
+	private ArrayList<String> trivialEliminators(String team) {
+		ArrayList<String> eliminators = new ArrayList<String>();
 		for (String opponent : teams()){
 			if (wins(opponent) > remaining(team) + wins(team))
-				return true;
+				eliminators.add(opponent);
 		}
-		return false;
+		return eliminators;
+	}
+
+	private ArrayList<String> nonTrivialEliminators(String team) {
+		ArrayList<String> eliminators = new ArrayList<String>();
+		for (String opponent : teams()) {
+			int teamVertexIdx = teamNumbers.get(opponent) + 1 + (numberOfTeams() * numberOfTeams()) / 2;
+			if (ff.inCut(teamVertexIdx)) {
+				eliminators.add(opponent);
+			}
+		}
+		return eliminators;
+	}
+
+	private boolean isTriviallyEliminated(String team) {
+		return trivialEliminators(team).size() > 0;
 	}
 
 	private boolean isNonTriviallyEliminated(String team) {
 		int teamNumber = teamNumbers.get(team);
-		int noGames = numberOfTeams() * numberOfTeams();
-		FlowNetwork flowNetwork = new FlowNetwork(noGames + numberOfTeams() + 2);
+		int noTeams = numberOfTeams();
+		int noGames = (noTeams * noTeams) / 2;
+		FlowNetwork flowNetwork = new FlowNetwork(noGames + noTeams + 2);
 		int s = 0;
 		int t = flowNetwork.V() - 1;
-		int nodeIdx = 0;
-		int capacity;
+		int gamesLeft;
 		int expected = 0;
-		int maxwins;
+		int maxWins;
+		int gameStart = 1;
+		int teamStart = 1 + noGames;
+		int teamNo;
+		int opponentNo;
 
-		for (int teamNo = 0; teamNo < numberOfTeams(); teamNo++){
-			if (teamNo == teamNumber) continue;
-			for (int opponentNo = 0; opponentNo < numberOfTeams(); opponentNo++){
-				if (opponentNo == teamNumber) continue;
-				capacity = against[teamNo][opponentNo];
-				nodeIdx = 1 + (teamNo * opponentNo) + opponentNo;
-				if (teamNo != opponentNo){
-					//s to games
-					flowNetwork.addEdge(new FlowEdge(s, nodeIdx, capacity));
-					//games to teams
-					flowNetwork.addEdge(new FlowEdge(nodeIdx, nodeIdx + teamNo, Integer.MAX_VALUE));
-					flowNetwork.addEdge(new FlowEdge(nodeIdx, nodeIdx + opponentNo, Integer.MAX_VALUE));
-					//teams to t
-				}
-			}
-			maxwins = wins[teamNo] + remaining[teamNo] - wins(team);
-			expected += maxwins;
-			flowNetwork.addEdge(new FlowEdge(nodeIdx + teamNo, t, maxwins));
+		//s to games and games to teams
+		for (int game = 0; game < noGames; game++) {
+			teamNo = game / noTeams;
+			opponentNo = game % noTeams;
+			
+			if (teamNo == teamNumber || opponentNo == teamNumber) continue;
+
+			gamesLeft = against(teamName(teamNo), teamName(opponentNo));
+
+			flowNetwork.addEdge(new FlowEdge(s, 1 + game, gamesLeft));
+			flowNetwork.addEdge(new FlowEdge(1 + game, teamStart + teamNo, Double.POSITIVE_INFINITY));
+			flowNetwork.addEdge(new FlowEdge(1 + game, teamStart + opponentNo, Double.POSITIVE_INFINITY));
 		}
 
-		FordFulkerson ff = new FordFulkerson(flowNetwork, s, t);
+		//teams to t
+		for (teamNo = 0; teamNo < noTeams; teamNo++) {
+			if (teamNo == teamNumber) continue;
+			maxWins = Math.max(wins(team) + remaining(team) - wins[teamNo], 0);
+			expected += maxWins;
+			flowNetwork.addEdge(new FlowEdge(teamStart + teamNo, t, maxWins));
+		}
+
+		ff = new FordFulkerson(flowNetwork, s, t);
 		if (ff.value() == expected)  return true;
 		return false;
 	}
@@ -143,18 +156,9 @@ public class BaseballElimination {
 		if (!teamNumbers.containsKey(team))
 			throw new java.lang.IllegalArgumentException("Invalid team");
 
-		ArrayList<String> eliminatingTeams = new ArrayList<String>();
-
-		if (isEliminated(team)) {
-			for (String candidate : teams()) {
-				int teamVertexIdx = teamNumbers.get(candidate) + numberOfTeams() * (numberOfTeams() + 1) + 1;
-				if (ff.inCut(teamVertexIdx)) {
-					eliminatingTeams.add(candidate);
-				}
-			}
-		}
-
-		return eliminatingTeams;
+		ArrayList<String> eliminators = trivialEliminators(team);
+		eliminators.addAll(nonTrivialEliminators(team));
+		return new HashSet<String>(eliminators);
 	}
 
 	public static void main(String[] args) {
