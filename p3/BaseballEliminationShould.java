@@ -1,29 +1,11 @@
-
-// import org.junit.Test;
-// import static org.junit.Assert.*;
-//
-// public class MyUnitTest {
-//
-//     @Test
-//     public void testConcatenate() {
-//         MyUnit myUnit = new MyUnit();
-//
-//         String result = myUnit.concatenate("one", "two");
-//
-//         assertEquals("onetwo", result);
-//
-//     }
-// }
-
-
-
-import org.junit.Test;
+import org.junit.*;
 import static org.junit.Assert.*;
+import edu.princeton.cs.algs4.*;
 
 
 public class BaseballEliminationShould {
 
-	BaseballElimination baseball = new BaseballElimination("baseball-testing/baseball/teams4.txt");
+	private BaseballElimination baseball = new BaseballElimination("baseball-testing/baseball/teams4.txt");
 
 	@Test
 	public void returnNumberOfTeams() {
@@ -35,4 +17,24 @@ public class BaseballEliminationShould {
 		assertEquals(83, baseball.wins("Atlanta"));
 		assertEquals(80, baseball.wins("Philadelphia"));
 	}
+
+	@Test
+	public void returnCorrectLossCount() {
+		assertEquals(8, baseball.remaining("Atlanta"));
+		assertEquals(3, baseball.remaining("Montreal"));
+	}
+
+
+	@Test
+	public void returnCorrectAgainstCount() {
+		assertEquals(0, baseball.against("Atlanta", "Atlanta"));
+		assertEquals(1, baseball.against("Atlanta","Philadelphia"));
+		assertEquals(2, baseball.against("Philadelphia", "Montreal"));
+	}
+
+	// @Test public void calculateNumberOfGames() {
+	// 	assertEquals(6, baseball.numberOfGames());
+	// }
+
+
 }
