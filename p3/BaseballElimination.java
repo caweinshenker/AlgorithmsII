@@ -83,7 +83,9 @@ public class BaseballElimination {
 		if (!teamNumbers.containsKey(team))
 			throw new java.lang.IllegalArgumentException("Invalid team");
 
-		return isTriviallyEliminated(team) || isNonTriviallyEliminated(team);
+		if (isTriviallyEliminated(team)) return true;
+		if (isNonTriviallyEliminated(team)) return true;
+		return false;
 	}
 
 	private ArrayList<String> trivialEliminators(String team) {
@@ -97,14 +99,17 @@ public class BaseballElimination {
 
 	private ArrayList<String> nonTrivialEliminators(String team) {
 		ArrayList<String> eliminators = new ArrayList<String>();
+		int teamIdx = 0;
 		for (String opponent : teams()) {
-			int teamVertexIdx = 1 + numberOfGames();
-			if (ff.inCut(teamVertexIdx)) {
-				eliminators.add(opponent);
-			}
+				int teamVertexIdx = 1 + numberOfGames() + teamIdx;
+				if (ff.inCut(teamVertexIdx)) {
+					eliminators.add(opponent);
+				}
+				teamIdx++;
 		}
 		return eliminators;
 	}
+
 
 	private boolean isTriviallyEliminated(String team) {
 		return trivialEliminators(team).size() > 0;
@@ -135,11 +140,12 @@ public class BaseballElimination {
 		for (int teamNo = 0; teamNo < noTeams; teamNo++) {
 			for (int opponentNo = teamNo + 1; opponentNo < noTeams; opponentNo++) {
 				if (teamNumber == teamNo || teamNumber == opponentNo) {
-					game++;
 					continue;
 				}
 				gamesLeft = against(teamName(teamNo), teamName(opponentNo));
-				StdOut.printf("Team: %d, opponent %d, gamesLeft %d\n", teamNo, opponentNo, gamesLeft);
+				expected += gamesLeft;
+
+				StdOut.printf("Game: %d, Team: %d, Opponent: %d\n", game, teamNo, opponentNo);
 				flowNetwork.addEdge(new FlowEdge(s, 1 + game, gamesLeft));
 				flowNetwork.addEdge(new FlowEdge(1 + game, teamStart + teamNo, Double.POSITIVE_INFINITY));
 				flowNetwork.addEdge(new FlowEdge(1 + game, teamStart + opponentNo, Double.POSITIVE_INFINITY));
@@ -151,14 +157,18 @@ public class BaseballElimination {
 		for (int teamNo = 0; teamNo < noTeams; teamNo++) {
 			if (teamNumber == teamNo) continue;
 			int maxWins = Math.max(wins(team) + remaining(team) - wins[teamNo], 0);
-			expected += maxWins;
 			flowNetwork.addEdge(new FlowEdge(teamStart + teamNo, t, maxWins));
 		}
-		
+
 		ff = new FordFulkerson(flowNetwork, s, t);
 
-		StdOut.printf("Expected: %d, Got: %f\n", expected, ff.value());
-		if (ff.value() == expected)  return true;
+		StdOut.printf("%s", flowNetwork.toString());
+
+		for (FlowEdge e : flowNetwork.adj(s)) {
+			if ((int) e.capacity() != (int) e.flow())
+				return true;
+		}
+
 		return false;
 	}
 
