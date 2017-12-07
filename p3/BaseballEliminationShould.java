@@ -20,7 +20,17 @@ public class BaseballEliminationShould {
 
 	@Test
 	public void returnCorrectLossCount() {
+		assertEquals(71, baseball.losses("Atlanta"));
+		assertEquals(79, baseball.losses("Philadelphia"));
+		assertEquals(78, baseball.losses("New York"));
+		assertEquals(82, baseball.losses("Montreal"));
+	}
+
+	@Test
+	public void returnCorrectRemaining() {
 		assertEquals(8, baseball.remaining("Atlanta"));
+		assertEquals(3, baseball.remaining("Philadelphia"));
+		assertEquals(6, baseball.remaining("New York"));
 		assertEquals(3, baseball.remaining("Montreal"));
 	}
 

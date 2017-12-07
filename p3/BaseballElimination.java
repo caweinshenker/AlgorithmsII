@@ -33,6 +33,7 @@ public class BaseballElimination {
 			wins[team] = in.readInt();
 			losses[team] = in.readInt();
 			remaining[team] = in.readInt();
+			//StdOut.printf("%s %d %d %d\n", names[team], wins[team], losses[team], remaining[team]);
 			for (int opponent = 0; opponent < teams; opponent++) {
 				against[team][opponent] = in.readInt();
 			}
@@ -58,7 +59,7 @@ public class BaseballElimination {
 		if (!teamNumbers.containsKey(team))
 			throw new java.lang.IllegalArgumentException("Invalid team");
 
-		return wins[teamNumbers.get(team)];
+		return losses[teamNumbers.get(team)];
 	}
 
 	public int remaining(String team) {
@@ -99,15 +100,17 @@ public class BaseballElimination {
 
 	private ArrayList<String> nonTrivialEliminators(String team) {
 		ArrayList<String> eliminators = new ArrayList<String>();
-		int teamIdx = 0;
-		for (String opponent : teams()) {
-				int teamVertexIdx = 1 + numberOfGames() + teamIdx;
-				if (ff.inCut(teamVertexIdx)) {
-					eliminators.add(opponent);
-				}
-				teamIdx++;
+		int noGames = numberOfGames();
+
+		if (ff == null){
+			isNonTriviallyEliminated(team);
 		}
-		return eliminators;
+
+		for (int teamNo = 0; teamNo < numberOfTeams(); teamNo++){
+			if (ff.inCut(1 + noGames + teamNo))
+				eliminators.add(names[teamNo]);
+		}
+		return eliminators.size() == 0 ? null : eliminators;
 	}
 
 
@@ -145,7 +148,7 @@ public class BaseballElimination {
 				gamesLeft = against(teamName(teamNo), teamName(opponentNo));
 				expected += gamesLeft;
 
-				StdOut.printf("Game: %d, Team: %d, Opponent: %d\n", game, teamNo, opponentNo);
+				//StdOut.printf("Game: %d, Team: %d, Opponent: %d\n", game, teamNo, opponentNo);
 				flowNetwork.addEdge(new FlowEdge(s, 1 + game, gamesLeft));
 				flowNetwork.addEdge(new FlowEdge(1 + game, teamStart + teamNo, Double.POSITIVE_INFINITY));
 				flowNetwork.addEdge(new FlowEdge(1 + game, teamStart + opponentNo, Double.POSITIVE_INFINITY));
@@ -162,7 +165,7 @@ public class BaseballElimination {
 
 		ff = new FordFulkerson(flowNetwork, s, t);
 
-		StdOut.printf("%s", flowNetwork.toString());
+		//StdOut.printf("%s", flowNetwork.toString());
 
 		for (FlowEdge e : flowNetwork.adj(s)) {
 			if ((int) e.capacity() != (int) e.flow())
