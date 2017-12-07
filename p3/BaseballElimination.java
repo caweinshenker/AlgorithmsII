@@ -33,7 +33,6 @@ public class BaseballElimination {
 			wins[team] = in.readInt();
 			losses[team] = in.readInt();
 			remaining[team] = in.readInt();
-			//StdOut.printf("%s %d %d %d\n", names[team], wins[team], losses[team], remaining[team]);
 			for (int opponent = 0; opponent < teams; opponent++) {
 				against[team][opponent] = in.readInt();
 			}
@@ -102,15 +101,11 @@ public class BaseballElimination {
 		ArrayList<String> eliminators = new ArrayList<String>();
 		int noGames = numberOfGames();
 
-		if (ff == null){
-			isNonTriviallyEliminated(team);
-		}
-
 		for (int teamNo = 0; teamNo < numberOfTeams(); teamNo++){
 			if (ff.inCut(1 + noGames + teamNo))
 				eliminators.add(names[teamNo]);
 		}
-		return eliminators.size() == 0 ? null : eliminators;
+		return eliminators;
 	}
 
 
