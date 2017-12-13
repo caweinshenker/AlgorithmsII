@@ -1,5 +1,8 @@
 import edu.princeton.cs.algs4.*;
-import java.util.*;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.lang.*;
 
 public class BoggleSolver
@@ -40,16 +43,17 @@ public class BoggleSolver
 
     public void dfs(String curString, int row, int col, ArrayList<String> words, boolean[][] visited, BoggleBoard board) {
 
+        if (visited[rowDelta][colDelta]) return;
+        if (!tst.keysWithPrefix().iterator().hasNext()) return;
+        if (tst.get(curString) != null) words.add(curString);
+        boolean[][] visitedCopy = new boolean[rows][cols];
+        visitedCopy[rowDelta][colDelta] = true;
+
         StdOut.printf("%s\n", curString);
-        if (!tst.longestPrefixOf(curString).equals(curString)) return;
-        StdOut.printf("%s passed\n", curString);
         for (int rowDelta = Math.max(0, row - 1); rowDelta < Math.min(row + 1, rows - 1); rowDelta++) {
             for (int colDelta = Math.max(0, col - 1); colDelta < Math.min(col + 1, cols - 1) ; colDelta++) {
-                if (visited[rowDelta][colDelta]) return;
-                visited[rowDelta][colDelta] = true;
-                if (tst.get(curString) != null) words.add(curString);
                 String newSeed = curString + Character.toString(board.getLetter(rowDelta, colDelta));
-                dfs(newSeed, rowDelta, colDelta, words, visited, board);
+                dfs(newSeed, rowDelta, colDelta, words, visitedCopy, board);
             }
         }
     }
