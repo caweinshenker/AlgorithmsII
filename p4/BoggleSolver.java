@@ -41,17 +41,21 @@ public class BoggleSolver
     }
 
 
-    public void dfs(String curString, int row, int col, ArrayList<String> words, boolean[][] visited, BoggleBoard board) {
+    private void dfs(String curString, int row, int col, ArrayList<String> words, boolean[][] visited, BoggleBoard board) {
 
-        if (visited[rowDelta][colDelta]) return;
-        if (!tst.keysWithPrefix().iterator().hasNext()) return;
+        //StdOut.printf("%s\n", curString);
+        if (visited[row][col]) return;
+        if (!tst.keysWithPrefix(curString).iterator().hasNext()) return;
         if (tst.get(curString) != null) words.add(curString);
         boolean[][] visitedCopy = new boolean[rows][cols];
-        visitedCopy[rowDelta][colDelta] = true;
+        for (int i = 0; i < rows; i++){
+          visitedCopy[i] = visited[i].clone();
+        }
+        visitedCopy[row][col] = true;
 
-        StdOut.printf("%s\n", curString);
-        for (int rowDelta = Math.max(0, row - 1); rowDelta < Math.min(row + 1, rows - 1); rowDelta++) {
-            for (int colDelta = Math.max(0, col - 1); colDelta < Math.min(col + 1, cols - 1) ; colDelta++) {
+
+        for (int rowDelta = Math.max(0, row - 1); rowDelta <= Math.min(row + 1, rows - 1); rowDelta++) {
+            for (int colDelta = Math.max(0, col - 1); colDelta <= Math.min(col + 1, cols - 1) ; colDelta++) {
                 String newSeed = curString + Character.toString(board.getLetter(rowDelta, colDelta));
                 dfs(newSeed, rowDelta, colDelta, words, visitedCopy, board);
             }
