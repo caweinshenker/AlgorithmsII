@@ -8,17 +8,17 @@ import java.lang.*;
 public class BoggleSolver
 {
 
-    private TST<Integer> tst;
+    private TrieSET tst;
     private int rows;
     private int cols;
 
     // Initializes the data structure using the given array of strings as the dictionary.
     // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
     public BoggleSolver(String[] dictionary) {
-        tst = new TST<Integer>();
+        tst = new TrieSET();
 
         for (int i = 0; i < dictionary.length; i++) {
-            tst.put(dictionary[i], i);
+            tst.add(dictionary[i]);
         }
     }
 
@@ -46,7 +46,7 @@ public class BoggleSolver
         //StdOut.printf("%s\n", curString);
         if (visited[row][col]) return;
         if (!tst.keysWithPrefix(curString).iterator().hasNext()) return;
-        if (tst.get(curString) != null) words.add(curString);
+        if (tst.contains(curString)) words.add(curString);
         boolean[][] visitedCopy = new boolean[rows][cols];
         for (int i = 0; i < rows; i++){
           visitedCopy[i] = visited[i].clone();
