@@ -8,17 +8,18 @@ import java.lang.*;
 public class BoggleSolver
 {
 
-    private TrieSET tst;
+    private TST<Integer> tst;
     private int rows;
     private int cols;
 
     // Initializes the data structure using the given array of strings as the dictionary.
     // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
     public BoggleSolver(String[] dictionary) {
-        tst = new TrieSET();
+        Quick3string.sort(dictionary);
+        tst = new TST<Integer>();
 
         for (int i = 0; i < dictionary.length; i++) {
-            tst.add(dictionary[i]);
+            tst.put(dictionary[i], i);
         }
     }
 
@@ -46,7 +47,7 @@ public class BoggleSolver
         //StdOut.printf("%s\n", curString);
         if (visited[row][col]) return;
         if (!tst.keysWithPrefix(curString).iterator().hasNext()) return;
-        if (tst.contains(curString)) words.add(curString);
+        if (curString.length() >= 3 && tst.get(curString) != null) words.add(curString);
         boolean[][] visitedCopy = new boolean[rows][cols];
         for (int i = 0; i < rows; i++){
           visitedCopy[i] = visited[i].clone();
@@ -54,8 +55,8 @@ public class BoggleSolver
         visitedCopy[row][col] = true;
 
 
-        for (int rowDelta = Math.max(0, row - 1); rowDelta <= Math.min(row + 1, rows - 1); rowDelta++) {
-            for (int colDelta = Math.max(0, col - 1); colDelta <= Math.min(col + 1, cols - 1) ; colDelta++) {
+        for (int rowDelta = Math.max(0, row - 1); rowDelta < Math.min(row + 2, rows); rowDelta++) {
+            for (int colDelta = Math.max(0, col - 1); colDelta < Math.min(col + 2, cols) ; colDelta++) {
                 String newSeed = curString + Character.toString(board.getLetter(rowDelta, colDelta));
                 dfs(newSeed, rowDelta, colDelta, words, visitedCopy, board);
             }
@@ -69,6 +70,8 @@ public class BoggleSolver
         if (word == null)
             throw new java.lang.IllegalArgumentException("Null word cannot be scored\n");
 
+        if (tst.get(word) == null || word.length() < 3) return 0;
+
         int score = 0;
         String wordCopy = word;
         BoyerMoore bm = new BoyerMoore("Qu");
@@ -78,8 +81,7 @@ public class BoggleSolver
             wordCopy = wordCopy.substring(index);
         }
 
-        if      (word.length() < 3)  return score + 0;
-        else if (word.length() < 5)  return score + 1;
+        if (word.length() < 5)  return score + 1;
         else if (word.length() == 5) return score + 2;
         else if (word.length() == 6) return score + 3;
         else if (word.length() == 7) return score + 5;
