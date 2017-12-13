@@ -47,7 +47,7 @@ public class BoggleSolver
         //StdOut.printf("%s\n", curString);
         if (visited[row][col]) return;
         if (!tst.keysWithPrefix(curString).iterator().hasNext()) return;
-        if (curString.length() >= 3 && tst.get(curString) != null) words.add(curString);
+        if (boggleLength(curString) >= 3 && tst.get(curString) != null) words.add(curString);
         boolean[][] visitedCopy = new boolean[rows][cols];
         for (int i = 0; i < rows; i++){
           visitedCopy[i] = visited[i].clone();
@@ -63,6 +63,18 @@ public class BoggleSolver
         }
     }
 
+    private int boggleLength(String word) {
+        int length = word.length();
+        String wordCopy = word;
+        BoyerMoore bm = new BoyerMoore("QU");
+        while (wordCopy.length() > 0) {
+            int index = bm.search(wordCopy);
+            if (index < wordCopy.length()) length--;
+            wordCopy = wordCopy.substring(index);
+        }
+        return length;
+    }
+
 
     // Returns the score of the given word if it is in the dictionary, zero otherwise.
     // (You can assume the word contains only the uppercase letters A through Z.)
@@ -70,22 +82,15 @@ public class BoggleSolver
         if (word == null)
             throw new java.lang.IllegalArgumentException("Null word cannot be scored\n");
 
-        if (tst.get(word) == null || word.length() < 3) return 0;
+        int boggleLength = boggleLength(word);
 
-        int score = 0;
-        String wordCopy = word;
-        BoyerMoore bm = new BoyerMoore("Qu");
-        while (wordCopy.length() > 0) {
-            int index = bm.search(wordCopy);
-            if (index < wordCopy.length()) score--;
-            wordCopy = wordCopy.substring(index);
-        }
+        if (tst.get(word) == null || boggleLength < 3) return 0;
 
-        if (word.length() < 5)  return score + 1;
-        else if (word.length() == 5) return score + 2;
-        else if (word.length() == 6) return score + 3;
-        else if (word.length() == 7) return score + 5;
-        else return score + 11;
+        if      (boggleLength < 5)  return 1;
+        else if (boggleLength == 5) return 2;
+        else if (boggleLength == 6) return 3;
+        else if (boggleLength == 7) return 5;
+        else return 11;
     }
 
 
