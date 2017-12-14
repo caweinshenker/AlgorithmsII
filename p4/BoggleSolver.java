@@ -32,22 +32,19 @@ public class BoggleSolver
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
                 boolean[][] visited = new boolean[rows][cols];
-                ArrayList<String> words = new ArrayList<String>();
                 String seed = Character.toString(board.getLetter(row, col));
                 if (seed.equals("Q")) seed="QU";
-                dfs(seed, row, col, words, visited, board);
-                validWords.addAll(words);
+                dfs(seed, row, col, validWords, visited, board);
             }
         }
         return validWords;
     }
 
 
-    private void dfs(String curString, int row, int col, ArrayList<String> words, boolean[][] visited, BoggleBoard board) {
+    private void dfs(String curString, int row, int col, Set<String> words, boolean[][] visited, BoggleBoard board) {
 
-        if (visited[row][col]) return;
+        //StdOut.printf("Dead end: %s %d\n", curString, curString.length());
         if (!tst.keysWithPrefix(curString).iterator().hasNext()) {
-          StdOut.printf("Dead end: %s\n", curString);
           return;
         }
         if (curString.length() >= 3 && tst.get(curString) != null) words.add(curString);
@@ -59,6 +56,7 @@ public class BoggleSolver
 
         for (int rowDelta = Math.max(0, row - 1); rowDelta < Math.min(row + 2, rows); rowDelta++) {
             for (int colDelta = Math.max(0, col - 1); colDelta < Math.min(col + 2, cols) ; colDelta++) {
+                if (visitedCopy[rowDelta][colDelta]) continue;
                 String newSeed = Character.toString(board.getLetter(rowDelta, colDelta));
                 if (newSeed.equals("Q")) newSeed = "QU";
                 newSeed = curString + newSeed;
