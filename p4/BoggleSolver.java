@@ -8,18 +8,20 @@ import java.lang.*;
 public class BoggleSolver
 {
 
-    private TST<Integer> tst;
+    private TrieSET tst;
     private int rows;
     private int cols;
+    boolean[][] visited;
+
 
     // Initializes the data structure using the given array of strings as the dictionary.
     // (You can assume each word in the dictionary contains only the uppercase letters A through Z.)
     public BoggleSolver(String[] dictionary) {
         //Quick3string.sort(dictionary);
-        tst = new TST<Integer>();
+        tst = new TrieSET();
 
         for (int i = 0; i < dictionary.length; i++) {
-            tst.put(dictionary[i], i);
+            tst.add(dictionary[i]);
         }
     }
 
@@ -28,41 +30,40 @@ public class BoggleSolver
         Set<String> validWords = new HashSet<String>();
         rows = board.rows();
         cols = board.cols();
+        visited = new boolean[rows][cols];
 
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
-                boolean[][] visited = new boolean[rows][cols];
                 String seed = Character.toString(board.getLetter(row, col));
                 if (seed.equals("Q")) seed="QU";
-                dfs(seed, row, col, validWords, visited, board);
+                dfs(seed, row, col, validWords, board);
             }
         }
         return validWords;
     }
 
 
-    private void dfs(String curString, int row, int col, Set<String> words, boolean[][] visited, BoggleBoard board) {
+    private void dfs(String curString, int row, int col, Set<String> words, BoggleBoard board) {
 
         //StdOut.printf("Dead end: %s %d\n", curString, curString.length());
         if (!tst.keysWithPrefix(curString).iterator().hasNext()) {
           return;
         }
-        if (curString.length() >= 3 && tst.get(curString) != null) words.add(curString);
-        boolean[][] visitedCopy = new boolean[rows][cols];
-        for (int i = 0; i < rows; i++){
-          visitedCopy[i] = visited[i].clone();
-        }
-        visitedCopy[row][col] = true;
+        if (curString.length() >= 3 && tst.contains(curString)) words.add(curString);
+
+        visited[row][col] = true;
 
         for (int rowDelta = Math.max(0, row - 1); rowDelta < Math.min(row + 2, rows); rowDelta++) {
             for (int colDelta = Math.max(0, col - 1); colDelta < Math.min(col + 2, cols) ; colDelta++) {
-                if (visitedCopy[rowDelta][colDelta]) continue;
+                if (visited[rowDelta][colDelta]) continue;
                 String newSeed = Character.toString(board.getLetter(rowDelta, colDelta));
                 if (newSeed.equals("Q")) newSeed = "QU";
                 newSeed = curString + newSeed;
-                dfs(newSeed, rowDelta, colDelta, words, visitedCopy, board);
+                dfs(newSeed, rowDelta, colDelta, words, board);
             }
         }
+
+        visited[row][col] = false;
     }
 
 
@@ -74,7 +75,7 @@ public class BoggleSolver
 
         int length = word.length();
 
-        if (tst.get(word) == null || length < 3) return 0;
+        if (!tst.contains(word) || length < 3) return 0;
 
         if      (length < 5)  return 1;
         else if (length == 5) return 2;
