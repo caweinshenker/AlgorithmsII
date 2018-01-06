@@ -3,22 +3,33 @@ import java.lang.*;
 import edu.princeton.cs.algs4.*;
 
 public class BurrowsWheeler {
+
+    private int firstSuffixIndex;
+    private int[] t;
+
     // apply Burrows-Wheeler transform, reading from standard input and writing to standard output
     public static void transform() {
         String s = StdIn.readString();
-        StringBuilder sb = new StringBuilder();
+        t = new int[s.length()];
         CircularSuffixArray csa = new CircularSuffixArray(s);
-        int index = 0;
-        for (int i = 0; i < s.length(); i++) {
-          int loc = csa.index(i);
-          if (loc == 0) index = i;
-          sb.append(s.charAt((loc + s.length()) % s.length()));
+        int sortedSuffixIndex = 0;
+
+        for (int suffixNumber = 0; suffixNumber < s.length(); suffixNumber++) {
+          sortedSuffixIndex = csa.index(suffixNumber);
+          if (sortedSuffixIndex == 0) firstSuffixIndex = suffixNumber;
+          int ch = s.charAt((sortedSuffixIndex + s.length() - 1) % s.length());
+          t[suffixNumber] = ch;
         }
-        StdOut.printf("%d\n%s", csa.index(0), sb.toString());
+        BinaryStdOut.write(firstSuffixIndex);
+        BinaryStdOut.write(new String(t));
+        BinaryStdOut.flush();
     }
 
     // apply Burrows-Wheeler inverse transform, reading from standard input and writing to standard output
     public static void inverseTransform() {
+        String s = BinaryStdIn.readString();
+        int[] next = new int[s.length()];
+
 
     }
 
