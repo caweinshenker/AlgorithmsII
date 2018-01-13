@@ -4,33 +4,43 @@ import edu.princeton.cs.algs4.*;
 
 public class BurrowsWheeler {
 
-    private int firstSuffixIndex;
-    private int[] t;
+
+    private static CircularSuffixArray csa;
 
     // apply Burrows-Wheeler transform, reading from standard input and writing to standard output
     public static void transform() {
         String s = StdIn.readString();
-        t = new int[s.length()];
-        CircularSuffixArray csa = new CircularSuffixArray(s);
-        int sortedSuffixIndex = 0;
+        csa = new CircularSuffixArray(s);
+        int suffixNumber, ch, firstSuffixIndex = 0, sortedSuffixIndex = 0;
+        int[] t = new int[s.length()];
 
-        for (int suffixNumber = 0; suffixNumber < s.length(); suffixNumber++) {
+
+        for (suffixNumber = 0; suffixNumber < s.length(); suffixNumber++) {
           sortedSuffixIndex = csa.index(suffixNumber);
           if (sortedSuffixIndex == 0) firstSuffixIndex = suffixNumber;
-          int ch = s.charAt((sortedSuffixIndex + s.length() - 1) % s.length());
+          ch = s.charAt((sortedSuffixIndex + s.length() - 1) % s.length());
           t[suffixNumber] = ch;
         }
+
         BinaryStdOut.write(firstSuffixIndex);
-        BinaryStdOut.write(new String(t));
+        for (suffixNumber = 0; suffixNumber < t.length; suffixNumber++)
+          BinaryStdOut.write((char) t[suffixNumber]);
         BinaryStdOut.flush();
     }
 
     // apply Burrows-Wheeler inverse transform, reading from standard input and writing to standard output
     public static void inverseTransform() {
-        String s = BinaryStdIn.readString();
-        int[] next = new int[s.length()];
+        int i, j, firstSuffixIndex = BinaryStdIn.readInt();
+        int[] t = new int[csa.length()], next = new int[csa.length()];
 
+        for (i = 0; i < t.length; i++) {
+          t[i] = BinaryStdIn.readChar();
+        }
 
+        for (j = 0; j < csa.length(); j++) {
+            i = csa.index(j);
+            next[i] = csa.index(j + 1);
+        }
     }
 
     // if args[0] is '-', apply Burrows-Wheeler transform
