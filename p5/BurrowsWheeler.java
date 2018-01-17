@@ -4,13 +4,12 @@ import edu.princeton.cs.algs4.*;
 
 public class BurrowsWheeler {
 
-
-    private static CircularSuffixArray csa;
+    private static int R = 256;
 
     // apply Burrows-Wheeler transform, reading from standard input and writing to standard output
     public static void transform() {
         String s = StdIn.readString();
-        csa = new CircularSuffixArray(s);
+        CircularSuffixArray csa = new CircularSuffixArray(s);
         int suffixNumber, ch, firstSuffixIndex = 0, sortedSuffixIndex = 0;
         int[] t = new int[s.length()];
 
@@ -30,16 +29,28 @@ public class BurrowsWheeler {
 
     // apply Burrows-Wheeler inverse transform, reading from standard input and writing to standard output
     public static void inverseTransform() {
-        int i, j, firstSuffixIndex = BinaryStdIn.readInt();
-        int[] t = new int[csa.length()], next = new int[csa.length()];
+        int i, j, nxt = BinaryStdIn.readInt();
+        char[] t = new char[csa.length()];
+        int[] next = new int[csa.length()];
+        int[] count = new int[R + 1];
 
-        for (i = 0; i < t.length; i++) {
-          t[i] = BinaryStdIn.readChar();
+        for (j = 0; j < t.length; j++) {
+            t[j] = BinaryStdIn.readChar();
+            count[t[j]]++;
         }
 
-        for (j = 0; j < csa.length(); j++) {
-            i = csa.index(j);
-            next[i] = csa.index(j + 1);
+
+
+
+
+
+
+
+        LSD.sort(t, 1);
+
+        for (i = 0; i < t.length; i++) {
+            StdOut.printf("%s", t[nxt]);
+            nxt = next[nxt];
         }
     }
 
