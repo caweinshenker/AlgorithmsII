@@ -29,27 +29,37 @@ public class BurrowsWheeler {
 
     // apply Burrows-Wheeler inverse transform, reading from standard input and writing to standard output
     public static void inverseTransform() {
-        int i, j, nxt = BinaryStdIn.readInt();
-        char[] t = new char[csa.length()];
-        int[] next = new int[csa.length()];
+        int i, j, pos, nxt = BinaryStdIn.readInt();
+        int[] t = new int[];
+        int[] next = new int[];
+        int[] first = new int[];
         int[] count = new int[R + 1];
+        int[] locations = new int[R];
 
-        for (j = 0; j < t.length; j++) {
-            t[j] = BinaryStdIn.readChar();
-            count[t[j]]++;
+        //Collect t and compute frequency counts
+        for (i = 0; i < t.length; i++) {
+            t[i] = BinaryStdIn.readChar();
+            count[t[i] + 1]++;
         }
 
+        //Compute inclusive sum reduce over frequency
+        for (i = 0; i < R; i++)
+          count[i+1] += count[i];
 
-
-
-
-
-
-
-        LSD.sort(t, 1);
+        //Move elements of t to proper position
+        for (i = 0; i < R; i++) {
+            pos = count[t[i]]++;
+            first[pos] = t[i];
+        }
 
         for (i = 0; i < t.length; i++) {
-            StdOut.printf("%s", t[nxt]);
+          while(t[locations[first[i]]] != first[i])
+              locations[first[i]]++
+          next[i] = locations[first[i]]]++;
+        }
+
+        for (i = nxt; i != t.length - 1; i++) {
+            StdOut.printf("%c", t[nxt]);
             nxt = next[nxt];
         }
     }
