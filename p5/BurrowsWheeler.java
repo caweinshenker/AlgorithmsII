@@ -1,14 +1,14 @@
-import java.util.*;
-import java.lang.*;
-import edu.princeton.cs.algs4.*;
+import java.util.ArrayList;
+import java.lang.IllegalArgumentException;
+import edu.princeton.cs.algs4.BinaryStdIn;
+import edu.princeton.cs.algs4.BinaryStdOut;
 
 public class BurrowsWheeler {
 
-    private static int R = 256;
 
     // apply Burrows-Wheeler transform, reading from standard input and writing to standard output
     public static void transform() {
-        String s = StdIn.readString();
+        String s = BinaryStdIn.readString();
         CircularSuffixArray csa = new CircularSuffixArray(s);
         int suffixNumber, ch, firstSuffixIndex = 0, sortedSuffixIndex = 0;
         int[] t = new int[s.length()];
@@ -23,52 +23,54 @@ public class BurrowsWheeler {
 
         BinaryStdOut.write(firstSuffixIndex);
         for (suffixNumber = 0; suffixNumber < t.length; suffixNumber++)
-          BinaryStdOut.write((char) t[suffixNumber]);
+          BinaryStdOut.write(t[suffixNumber], 8);
         BinaryStdOut.flush();
     }
 
     // apply Burrows-Wheeler inverse transform, reading from standard input and writing to standard output
     public static void inverseTransform() {
-        int i, j, pos, nxt = BinaryStdIn.readInt();
-        int[] t = new int[];
-        int[] next = new int[];
-        int[] first = new int[];
+        int i, R = 256;
+        int nxt = BinaryStdIn.readInt();
+        ArrayList<Integer> t = new ArrayList<Integer>();
+        int[] next, first;
         int[] count = new int[R + 1];
         int[] locations = new int[R];
 
         //Collect t and compute frequency counts
-        for (i = 0; i < t.length; i++) {
-            t[i] = BinaryStdIn.readChar();
-            count[t[i] + 1]++;
+        while (!BinaryStdIn.isEmpty()) {
+            t.add(new Integer(BinaryStdIn.readChar()));
+            count[t.get(t.size() - 1) + 1]++;
         }
+
+        next = new int[t.size()];
+        first = new int[t.size()];
 
         //Compute inclusive sum reduce over frequency
         for (i = 0; i < R; i++)
           count[i+1] += count[i];
 
         //Move elements of t to proper position
-        for (i = 0; i < R; i++) {
-            pos = count[t[i]]++;
-            first[pos] = t[i];
+        for (i = 0; i < t.size(); i++)
+            first[count[t.get(i)]++] = t.get(i);
+
+        for (i = 0; i < t.size(); i++) {
+          while (t.get(locations[first[i]]) != first[i])  locations[first[i]]++;
+          next[i] = locations[first[i]]++;
+          //StdOut.printf("%d\n", next[i]);
         }
 
-        for (i = 0; i < t.length; i++) {
-          while(t[locations[first[i]]] != first[i])
-              locations[first[i]]++
-          next[i] = locations[first[i]]]++;
+        for (i = 0; i < t.size(); i++){
+             BinaryStdOut.write(first[nxt], 8);
+             nxt = next[nxt];
         }
-
-        for (i = nxt; i != t.length - 1; i++) {
-            StdOut.printf("%c", t[nxt]);
-            nxt = next[nxt];
-        }
+        BinaryStdOut.flush();
     }
 
     // if args[0] is '-', apply Burrows-Wheeler transform
     // if args[0] is '+', apply Burrows-Wheeler inverse transform
     public static void main(String[] args) {
       if (args.length != 1)
-          throw new java.lang.IllegalArgumentException("Wrong number of arguments\n");
+          throw new IllegalArgumentException("Wrong number of arguments\n");
 
       switch (args[0]) {
           case "-":
@@ -78,7 +80,7 @@ public class BurrowsWheeler {
               inverseTransform();
               break;
           default:
-              throw new java.lang.IllegalArgumentException("First argument must be +|-\n");
+              throw new IllegalArgumentException("First argument must be +|-\n");
       }
     }
 }

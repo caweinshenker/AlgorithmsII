@@ -1,13 +1,14 @@
 
-import java.util.*;
-import java.lang.*;
-import edu.princeton.cs.algs4.*;
+import java.util.ArrayList;
+import java.lang.IllegalArgumentException;
+import edu.princeton.cs.algs4.StdIn;
+import edu.princeton.cs.algs4.StdOut;
 
 
 public class CircularSuffixArray {
 
     private final int CUTOFF = 2;
-    private int[] index;
+    private final int[] index;
 
     public CircularSuffixArray(String s)  {
         if (s == null)
@@ -40,7 +41,6 @@ public class CircularSuffixArray {
 
     private void sort (String s, int lo, int hi, int d) {
 
-      // cutoff to insertion sort for small subarrays
       if (hi <= lo + CUTOFF) {
         insertion(s, lo, hi, d);
         return;

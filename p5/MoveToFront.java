@@ -1,7 +1,5 @@
 import edu.princeton.cs.algs4.BinaryStdIn;
 import edu.princeton.cs.algs4.BinaryStdOut;
-import edu.princeton.cs.algs4.StdIn;
-import edu.princeton.cs.algs4.StdOut;
 
 public class MoveToFront {
 
@@ -11,54 +9,49 @@ public class MoveToFront {
     public static void encode() {
 
         int i, c;
-        int[] aux, chars = new int[R];
+        int[] chars = new int[R];
 
-        for (i = 0; i < R; i++) {
+        for (i = 0; i < R; i++)
             chars[i] = i;
-        }
 
-        while (StdIn.hasNextChar()) {
-            c = StdIn.readChar();
-            aux = new int[R];
+        while (!BinaryStdIn.isEmpty()) {
+            c = BinaryStdIn.readChar();
             for (i = 0; i < R; i++) {
-                if (c == chars[i]) {
-                    StdOut.printf("%c", (char) i);
-                    for (int j = 1; j < R; j++) {
-                      if (j <= i) aux[j] = chars[j -1];
-                      else aux[j] = chars[j];
-                    }
-                    aux[0] = c;
-                    chars = aux;
+                if (c == chars[i])
                     break;
-                };
             }
+
+            for (int j = i; j > 0; j--)
+              chars[j] = chars[j-1];
+
+            chars[0] = c;
+
+            BinaryStdOut.write(i, 8);
         }
+        BinaryStdOut.flush();
     }
 
     // apply move-to-front decoding, reading from standard input and writing to standard output
     public static void decode() {
 
       int i, c, ch;
-      int[] aux, chars = new int[R];
+      int[] chars = new int[R];
 
-      for (i = 0; i < R; i++) {
+      for (i = 0; i < R; i++)
           chars[i] = i;
+
+      while (!BinaryStdIn.isEmpty()) {
+          c = BinaryStdIn.readChar();
+          ch = chars[c];
+          for (i = c; i > 0; i--) {
+              chars[i] = chars[i - 1];
+          }
+          chars[0] = ch;
+          BinaryStdOut.write(ch, 8);
       }
 
-      while (StdIn.hasNextChar()) {
-          c = StdIn.readChar();
-          ch = chars[c];
-          StdOut.printf("%c", ch);
-          aux = new int[R];
+       BinaryStdOut.flush();
 
-          for (i = 1; i < R; i++) {
-              if (i <= c) aux[i] = chars[i -1];
-              else aux[i] = chars[i];
-          }
-          
-          aux[0] = ch;
-          chars = aux;
-          }
       }
 
     // if args[0] is '-', apply move-to-front encoding
