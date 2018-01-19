@@ -18,11 +18,11 @@ public class MoveToFront {
             c = BinaryStdIn.readChar();
             for (i = 0; i < R; i++) {
                 if (c == chars[i])
-                    break;
+                break;
             }
 
             for (int j = i; j > 0; j--)
-              chars[j] = chars[j-1];
+                chars[j] = chars[j-1];
 
             chars[0] = c;
 
@@ -34,41 +34,41 @@ public class MoveToFront {
     // apply move-to-front decoding, reading from standard input and writing to standard output
     public static void decode() {
 
-      int i, c, ch;
-      int[] chars = new int[R];
+        int i, c, ch;
+        int[] chars = new int[R];
 
-      for (i = 0; i < R; i++)
-          chars[i] = i;
+        for (i = 0; i < R; i++)
+            chars[i] = i;
 
-      while (!BinaryStdIn.isEmpty()) {
-          c = BinaryStdIn.readChar();
-          ch = chars[c];
-          for (i = c; i > 0; i--) {
-              chars[i] = chars[i - 1];
-          }
-          chars[0] = ch;
-          BinaryStdOut.write(ch, 8);
-      }
+        while (!BinaryStdIn.isEmpty()) {
+            c = BinaryStdIn.readChar();
+            ch = chars[c];
+            for (i = c; i > 0; i--) {
+                chars[i] = chars[i - 1];
+            }
+            chars[0] = ch;
+            BinaryStdOut.write(ch, 8);
+        }
 
-       BinaryStdOut.flush();
+        BinaryStdOut.flush();
 
-      }
+    }
 
     // if args[0] is '-', apply move-to-front encoding
     // if args[0] is '+', apply move-to-front decoding
     public static void main(String[] args) {
-      if (args.length != 1)
-          throw new java.lang.IllegalArgumentException("Wrong number of arguments\n");
+        if (args.length != 1)
+        throw new java.lang.IllegalArgumentException("Wrong number of arguments\n");
 
-      switch (args[0]) {
-          case "-":
-              encode();
-              break;
-          case "+":
-              decode();
-              break;
-          default:
-              throw new java.lang.IllegalArgumentException("First argument must be +|-\n");
-          }
-      }
+        switch (args[0]) {
+            case "-":
+            encode();
+            break;
+            case "+":
+            decode();
+            break;
+            default:
+            throw new java.lang.IllegalArgumentException("First argument must be +|-\n");
+        }
+    }
 }

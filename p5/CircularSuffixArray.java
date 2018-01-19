@@ -12,12 +12,11 @@ public class CircularSuffixArray {
 
     public CircularSuffixArray(String s)  {
         if (s == null)
-          throw new java.lang.IllegalArgumentException("Null string");
+        throw new java.lang.IllegalArgumentException("Null string");
 
         index = new int[s.length()];
-        for (int i = 0; i < s.length(); i++){
+        for (int i = 0; i < s.length(); i++)
             index[i] = i;
-        }
 
         sort(s, 0, index.length - 1, 0);
     }
@@ -27,10 +26,10 @@ public class CircularSuffixArray {
     }
 
     public int index(int i)  {
-      if (i < 0 || i >= length())
+        if (i < 0 || i >= length())
         throw new java.lang.IllegalArgumentException("Index out of range");
 
-      return index[i];
+        return index[i];
     }
 
     private int charAt(String s, int i, int d) {
@@ -41,10 +40,10 @@ public class CircularSuffixArray {
 
     private void sort (String s, int lo, int hi, int d) {
 
-      if (hi <= lo + CUTOFF) {
-        insertion(s, lo, hi, d);
-        return;
-      }
+        if (hi <= lo + CUTOFF) {
+            insertion(s, lo, hi, d);
+            return;
+        }
 
         int lt = lo, gt = hi;
         int v = charAt(s, lo, d);
@@ -54,19 +53,19 @@ public class CircularSuffixArray {
             if      (t < v) exch(index, lt++, i++);
             else if (t > v) exch(index, i, gt--);
             else              i++;
-       }
+        }
 
-       sort(s, lo, lt-1, d);
-       if (v >= 0) sort(s, lt, gt, d+1);
-       sort(s, gt+1, hi, d);
+        sort(s, lo, lt-1, d);
+        if (v >= 0) sort(s, lt, gt, d+1);
+        sort(s, gt+1, hi, d);
     }
 
 
     // sort from a[lo] to a[hi], starting at the dth character
     private  void insertion(String s, int lo, int hi, int d) {
         for (int i = lo; i <= hi; i++)
-            for (int j = i; j > lo && less(s, j, j-1, d); j--)
-                exch(index, j, j-1);
+        for (int j = i; j > lo && less(s, j, j-1, d); j--)
+        exch(index, j, j-1);
     }
 
     // is v less than w, starting at character d
@@ -95,8 +94,8 @@ public class CircularSuffixArray {
                 for (int suf = 0; suf < args[i].length(); suf++) {
                     StdOut.printf("Index of sorted suffix %d : %d\n", suf, csa.index(suf));
                 }
-                    StdOut.printf("\n");
-              }
+                StdOut.printf("\n");
+            }
         }
     }
 }
